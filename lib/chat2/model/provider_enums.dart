@@ -1,6 +1,3 @@
-///
-/// The enum name says it all :)
-///
 enum CONNECTION_STATUS {
   CONNECTED,
   CONNECTING,
@@ -11,9 +8,6 @@ enum CONNECTION_STATUS {
   UNKNOWN,
 }
 
-///
-/// The enum name says it all :)
-///
 enum CHAT_SESSION_STATUS {
   CONFIGURING,
   ENDED,
@@ -23,18 +17,12 @@ enum CHAT_SESSION_STATUS {
   UNKNOWN,
 }
 
-///
-/// The enum name says it all :)
-///
 enum DELIVERY_STATUS {
   DELIVERED,
   PENDING,
   UNKNOWN,
 }
 
-///
-/// The enum name says it all :)
-///
 enum LOG_TYPE {
   ATTACHMENT_MESSAGE,
   CHAT_COMMENT,
@@ -47,9 +35,6 @@ enum LOG_TYPE {
   UNKNOWN,
 }
 
-///
-/// The enum name says it all :)
-///
 enum CHAT_PARTICIPANT {
   AGENT,
   SYSTEM,
@@ -57,28 +42,13 @@ enum CHAT_PARTICIPANT {
   VISITOR,
 }
 
-///
-/// The enum name says it all :)
-///
 enum RATING {
   NONE,
   GOOD,
   BAD,
 }
 
-///
-/// The enum name says it all :)
-///
 enum ATTACHMENT_ERROR {
   NONE,
   SIZE_LIMIT,
-}
-
-///
-/// The enum name says it all :)
-///
-enum PRE_CHAT_FIELD_STATUS {
-  OPTIONAL,
-  HIDDEN,
-  REQUIRED,
 }

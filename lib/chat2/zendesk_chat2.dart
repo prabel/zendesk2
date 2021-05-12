@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:zendesk2/zendesk2.dart';
+
+enum PRE_CHAT_FIELD_STATUS {
+  OPTIONAL,
+  HIDDEN,
+  REQUIRED,
+}
 
 class Zendesk2Chat {
   Zendesk2Chat._();
@@ -7,8 +12,7 @@ class Zendesk2Chat {
 
   static const _channel = const MethodChannel('zendesk2');
 
-  // ignore: close_sinks
-  StreamController<ProviderModel>? _providersStream;
+  StreamController<ProviderModel> _providersStream;
 
   bool _isLoggerEnabled = false;
 
@@ -16,9 +20,9 @@ class Zendesk2Chat {
   ///
   /// Stream is updated at Duration provided on ```startChatProviders```
   Stream<ProviderModel> get providersStream =>
-      _providersStream!.stream.asBroadcastStream();
+      _providersStream.stream.asBroadcastStream();
 
-  Timer? _getProvidersTimer;
+  Timer _getProvidersTimer;
 
   /// Initialize the Zendesk SDK
   ///
@@ -30,9 +34,10 @@ class Zendesk2Chat {
   Future<void> init(
     String accountKey,
     String appId, {
-    @Deprecated('Prefer to use custom UI chat providers')
-        Color iosThemeColor = Colors.indigo,
+    Color iosThemeColor,
   }) async {
+    assert(accountKey != null);
+    assert(appId != null);
     Map arguments = {
       'accountKey': accountKey,
       'appId': appId,
@@ -60,18 +65,18 @@ class Zendesk2Chat {
   ///
   /// ```tags``` The list of tags to represent the chat context
   Future<void> setVisitorInfo({
-    String name = '',
-    String email = '',
-    String phoneNumber = '',
-    String departmentName = '',
-    List<String> tags = const [],
+    String name,
+    String email,
+    String phoneNumber,
+    String departmentName,
+    List<String> tags,
   }) async {
     Map arguments = {
-      'name': name,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'departmentName': departmentName,
-      'tags': tags,
+      if (name != null) 'name': name,
+      if (email != null) 'email': email,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      if (departmentName != null) 'departmentName': departmentName,
+      if (tags != null) 'tags': tags,
     };
     try {
       final result = await _channel.invokeMethod('setVisitorInfo', arguments);
@@ -117,6 +122,17 @@ class Zendesk2Chat {
     bool endChatEnabled = false,
     bool transcriptChatEnabled = false,
   }) async {
+    assert(agentAvailability != null);
+    assert(transcript != null);
+    assert(preChatForm != null);
+    assert(offlineForms != null);
+    assert(nameFieldStatus != null);
+    assert(emailFieldStatus != null);
+    assert(phoneFieldStatus != null);
+    assert(departmentFieldStatus != null);
+    assert(endChatEnabled != null);
+    assert(transcriptChatEnabled != null);
+
     Map arguments = {
       'agentAvailability': agentAvailability,
       'transcript': transcriptChatEnabled,
@@ -156,6 +172,7 @@ class Zendesk2Chat {
   ///
   /// ```enabled``` if enabled, shows detailed information about the SDK actions
   Future<void> logger(bool enabled) async {
+    assert(enabled != null);
     _isLoggerEnabled = enabled;
     Map arguments = {
       'enabled': enabled,
@@ -174,8 +191,8 @@ class Zendesk2Chat {
   Future<void> dispose() async {
     try {
       _getProvidersTimer?.cancel();
-      await _providersStream!.sink.close();
-      await _providersStream!.close();
+      await _providersStream.sink.close();
+      await _providersStream.close();
       _providersStream = null;
       final result = await _channel.invokeMethod('dispose');
       if (_isLoggerEnabled) {
@@ -193,7 +210,6 @@ class Zendesk2Chat {
   /// ```botLabel``` text to represent the BOT name
   ///
   /// ```backButtonLabel``` button text to represent iOS back button
-  @Deprecated('Prefer to use the startChatProviders() method')
   Future<void> startChat({
     String toolbarTitle = 'Zendesk NativeChat',
     String botLabel = 'Z',
@@ -221,8 +237,8 @@ class Zendesk2Chat {
       {Duration periodicRetrieve = const Duration(milliseconds: 300)}) async {
     try {
       if (_providersStream != null) {
-        await _providersStream!.sink.close();
-        await _providersStream!.close();
+        await _providersStream.sink.close();
+        await _providersStream.close();
       }
       _providersStream = StreamController<ProviderModel>();
       final result = await _channel.invokeMethod('startChatProviders');
@@ -289,7 +305,8 @@ class Zendesk2Chat {
     final value = await _channel.invokeMethod('getChatProviders');
     if (value != null) {
       final providerModel = ProviderModel.fromJson(value);
-      _providersStream!.add(providerModel);
+      providerModel.logs.removeWhere((element) => element.chatLogType == null);
+      _providersStream.add(providerModel);
     }
   }
 
@@ -346,7 +363,7 @@ class Zendesk2Chat {
   }
 
   /// Providers only - retrieve all compatible file extensions for Zendesk live chat
-  Future<List<String>?> getAttachmentExtensions() async {
+  Future<List<String>> getAttachmentExtensions() async {
     try {
       final value =
           await _channel.invokeMethod('compatibleAttachmentsExtensions');
